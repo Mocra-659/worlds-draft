@@ -27,6 +27,15 @@ cursor:pointer;
 </head>
 <body>
 
+<h2>선수 선택</h2>
+
+<div id="player-buttons">
+<button onclick="pickPlayer('Faker')">Faker</button>
+<button onclick="pickPlayer('Chovy')">Chovy</button>
+<button onclick="pickPlayer('ShowMaker')">ShowMaker</button>
+<button onclick="pickPlayer('Knight')">Knight</button>
+</div>
+  
 <h1>🎙 Worlds Draft – Caster</h1>
 <div id="info"></div>
 <button onclick="undo()">🔁 되돌리기</button>
@@ -143,14 +152,6 @@ currentPick: index + 1
 });
 }
 
-<h2>선수 선택</h2>
-
-<div id="player-buttons">
-<button onclick="pickPlayer('Faker')">Faker</button>
-<button onclick="pickPlayer('Chovy')">Chovy</button>
-<button onclick="pickPlayer('ShowMaker')">ShowMaker</button>
-<button onclick="pickPlayer('Knight')">Knight</button>
-</div>
 </script>
 </body>
 </html>
