@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Worlds Draft – Viewer</title>
+
+<style>
+:root { --gold:#d4af37; }
+
+body {
+background:linear-gradient(180deg,#050505,#111);
+color:white;
+font-family:Arial;
+padding:20px;
+}
+
+.team {
+width:45%;
+display:inline-block;
+vertical-align:top;
+}
+
+.item {
+background:#1c1c1c;
+margin:6px 0;
+padding:8px;
+border-left:4px solid var(--gold);
+animation: pickIn .4s ease;
+}
+
+@keyframes pickIn {
+from {opacity:0; transform:translateX(-30px);}
+to {opacity:1; transform:translateX(0);}
+}
+
+/* 🎬 풀스크린 픽 연출 */
+#overlay {
+position:fixed;
+inset:0;
+background:black;
+display:none;
+align-items:center;
+justify-content:center;
+z-index:999;
+}
+
+#overlayCard {
+font-size:64px;
+padding:40px 80px;
+color:var(--gold);
+border:4px solid var(--gold);
+animation: zoom 1.4s ease forwards;
+}
+
+@keyframes zoom {
+0%{transform:scale(.4);opacity:0;}
+40%{transform:scale(1.1);opacity:1;}
+100%{transform:scale(1);opacity:0;}
+}
+</style>
+</head>
+<body>
+
+<h1>🏆 Worlds Draft</h1>
+<div id="status"></div>
+
+<div class="team">
+<h3>Team A</h3>
+<div id="A"></div>
+</div>
+
+<div class="team">
+<h3>Team B</h3>
+<div id="B"></div>
+</div>
+
+<div id="overlay"><div id="overlayCard"></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+/* 🔧 Firebase 설정 (아직 비워둠) */
+const firebaseConfig = {
+apiKey: "",
+authDomain: "",
+databaseURL: "",
+projectId: ""
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+let lastCount=0;
+
+function showOverlay(name){
+const o=document.getElementById("overlay");
+document.getElementById("overlayCard").innerText=name;
+o.style.display="flex";
+setTimeout(()=>o.style.display="none",1400);
+}
+
+onValue(ref(db,"draft"), snap=>{
+const d=snap.val();
+if(!d) return;
+
+const total=d.teamA.length+d.teamB.length;
+if(total>lastCount){
+const last =
+d.teamA.length>d.teamB.length
+? d.teamA.at(-1)
+: d.teamB.at(-1);
+showOverlay(last);
+lastCount=total;
+}
+
+document.getElementById("status").innerText=`Pool ${d.currentPool+1}`;
+
+["A","B"].forEach(s=>{
+const div=document.getElementById(s);
+div.innerHTML="";
+d[s==="A"?"teamA":"teamB"].forEach(t=>{
+const e=document.createElement("div");
+e.className="item";
+e.innerText=t;
+div.appendChild(e);
+});
+});
+});
+</script>
+</body>
+</html>
