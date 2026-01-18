@@ -37,7 +37,9 @@ cursor:pointer;
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-
+import { get, push, update }
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  
 /* 🔧 Firebase 설정 (아직 비워둠) */
 const firebaseConfig = {
 apiKey: "AIzaSyC1E1-vIqTBbe34LSjsbpMGnh4JLwMJycc",
@@ -113,6 +115,33 @@ render();
 }
 
 render();
+const PICK_ORDER = ["BLUE", "RED", "RED", "BLUE", "BLUE", "RED"];
+
+function pickPlayer(playerName) {
+const draftRef = ref(db, "draft");
+
+get(draftRef).then(snapshot => {
+const data = snapshot.val();
+const index = data?.currentPick ?? 0;
+
+if (index >= PICK_ORDER.length) {
+alert("픽 종료");
+return;
+}
+
+const team = PICK_ORDER[index];
+
+push(ref(db, "draft/picks"), {
+team,
+player: playerName,
+time: Date.now()
+});
+
+update(draftRef, {
+currentPick: index + 1
+});
+});
+}
 </script>
 </body>
 </html>
