@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Worlds Draft – Caster</title>
+<style>
+body {
+background:#0b0b0b;
+color:#d4af37;
+font-family:Arial;
+padding:20px;
+}
+.item {
+background:#1c1c1c;
+padding:8px;
+margin:6px 0;
+cursor:pointer;
+}
+button {
+background:#d4af37;
+border:none;
+padding:8px 14px;
+font-weight:bold;
+cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h1>🎙 Worlds Draft – Caster</h1>
+<div id="info"></div>
+<button onclick="undo()">🔁 되돌리기</button>
+
+<h3 id="poolTitle"></h3>
+<div id="pool"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+/* 🔧 Firebase 설정 (아직 비워둠) */
+const firebaseConfig = {
+apiKey: "",
+authDomain: "",
+databaseURL: "",
+projectId: ""
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* 🏆 Worlds 예시 데이터 */
+const data = {
+pools: [
+["JDG","GEN.G","T1","G2"],
+["BLG","KT","DK","FNC"],
+["LNG","WBG","NRG","C9"],
+["MAD","TL","BDS","GAM"]
+],
+pickOrder:["A","B","B","A"],
+currentPool:0,
+pickIndex:0,
+teamA:[],
+teamB:[],
+history:[]
+};
+
+function sync() {
+set(ref(db,"draft"), data);
+}
+
+function render() {
+document.getElementById("info").innerText =
+`Pool ${data.currentPool+1} | ${data.pickIndex+1}픽 → Team ${data.pickOrder[data.pickIndex]}`;
+
+document.getElementById("poolTitle").innerText = `Pool ${data.currentPool+1}`;
+const pool=document.getElementById("pool");
+pool.innerHTML="";
+
+data.pools[data.currentPool].forEach((t,i)=>{
+const d=document.createElement("div");
+d.className="item";
+d.innerText=t;
+d.onclick=()=>pick(t,i);
+pool.appendChild(d);
+});
+
+sync();
+}
+
+function pick(team,i){
+const side=data.pickOrder[data.pickIndex];
+data.pools[data.currentPool].splice(i,1);
+data[side==="A"?"teamA":"teamB"].push(team);
+data.history.push({team,side,pool:data.currentPool,pick:data.pickIndex});
+data.pickIndex++;
+
+if(data.pickIndex>=4){
+data.currentPool++;
+data.pickIndex=0;
+}
+render();
+}
+
+function undo(){
+const h=data.history.pop();
+if(!h) return;
+data.currentPool=h.pool;
+data.pickIndex=h.pick;
+data.pools[h.pool].push(h.team);
+data[h.side==="A"?"teamA":"teamB"].pop();
+render();
+}
+
+render();
+</script>
+</body>
+</html>
